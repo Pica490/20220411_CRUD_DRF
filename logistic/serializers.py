@@ -40,49 +40,11 @@ class StockSerializer(serializers.ModelSerializer):
 
         # обновляем склад по его параметрам
         stock = super().update(instance, validated_data)
-        data_stockProduct = StockProduct.objects.all()
 
-        n = len(positions)
-        q = len(StockProduct.objects.filter(stock_id=instance.id))
-        i = 0
+        StockProduct.objects.filter(stock_id=instance.id).delete()
 
-        if n == q:
-            for data in data_stockProduct:
-                if data.stock_id == instance.id:
-                    pos = positions[i]
-                    StockProduct.objects.filter(stock_id=instance.id, id = data.id ).update(stock=stock, **pos)
-                    i = +1
-
-        elif q == 0:
-            for pos in positions:
-                StockProduct.objects.filter(stock_id=instance.id).create(stock=stock, **pos)
-
-        elif n > q:
-
-            while i < q:
-                for data in data_stockProduct:
-                    if data.stock_id == instance.id:
-                        pos = positions[i]
-                        StockProduct.objects.filter(stock_id=instance.id, id = data.id ).update(stock=stock, **pos)
-                        i = +1
-                        n = n - 1
-            else:
-                for pos in positions[i+1:]:
-                    StockProduct.objects.filter(stock_id=instance.id).create(stock=stock, **pos)
-
-        elif n < q:
-
-            for data in data_stockProduct:
-
-                if data.stock_id == instance.id and i <= n:
-                    print(n,i)
-                    pos = positions[i]
-                    StockProduct.objects.filter(stock_id=instance.id, id=data.id).update(stock=stock, **pos)
-                    i = +1
-                    n = n - 1
-                elif data.stock_id == instance.id and i > n:
-
-                    StockProduct.objects.filter(stock_id=instance.id, id=data.id).delete()
+        for pos in positions:
+            StockProduct.objects.filter(stock_id=instance.id).create(stock=stock, **pos)
 
         return stock
 
