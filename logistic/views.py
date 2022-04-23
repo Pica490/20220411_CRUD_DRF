@@ -17,6 +17,13 @@ class ProductViewSet(ModelViewSet):
 class StockViewSet(ModelViewSet):
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ['products__id']
+
     pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+
+        id = self.request.query_params.get('products')
+
+        if id is not None:
+            queryset = self.queryset.filter(products__id=id)
+        return queryset
